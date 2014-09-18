@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
                 if (i == 1)
                 {
                     MIN = number;
+                    MAX = number;
                 }
                 /*get maximum number*/
                 MIN = ((MIN < number) ? MIN : number);
