@@ -92,6 +92,7 @@ my_strcpy_Cstr(mystring_T dst, const char * src)
     }
     memcpy(dst->string_data, src, space_wanted);
     dst->string_length = space_wanted - 1;
+    dst->allocated_block_length = dst->string_length - 1;
     return 0;
 }
 
@@ -114,11 +115,17 @@ int my_strcat(mystring_T dst, const mystring_T src)
 int
 main(int argc, char *argv[])
 {
-    printf("my_strcpy_Cstr(NULL, NULL) returns %d\n\n", 
-            my_strcpy_Cstr(NULL,NULL));
-    printf("my_strcpy(NULL, NULL) returns %d\n\n", 
-            my_strcpy(NULL,NULL));
-    printf("my_strccat(NULL, NULL) returns %d\n\n", 
-            my_strcat(NULL,NULL));
+    mystring_T test1 = new_mystr();
+    mystring_T test2 = new_mystr();
+    test1->string_data = "aaa";
+    test1->string_length = 3;
+    test1->allocated_block_length = 4;
+    test2->string_data = "bb";
+    test2->string_length = 2;
+    test2->allocated_block_length = 3;
+    printf("my return %d\n\n", my_strcpy_Cstr(test1,test2->string_data));
+    printf("my_strcpy_Cstr(NULL, NULL) returns %d\n\n", my_strcpy_Cstr(NULL,NULL));
+    printf("my_strcpy(NULL, NULL) returns %d\n\n", my_strcpy(NULL,NULL));
+    printf("my_strccat(NULL, NULL) returns %d\n\n", my_strcat(NULL,NULL));
     return EXIT_FAILURE;
 }
