@@ -1,0 +1,363 @@
+Script started on Thu 13 Nov 2014 11:00:44 PM MSK
+[?1034hsh-4.1$ make
+cat a9p2.c
+#include <stdio.h>
+#include <stdlib.h>
+#include "my_stack.h"
+
+int
+main(int argc, char * argv[])
+{
+    stack_t stack1;
+    int data;
+    int ret;
+
+    /* test the new_stack function */
+    stack1 = new_stack();
+    if (stack1 == NULL)
+    {
+        fprintf(stderr, "Failure to initialize a new stack\n");
+        return EXIT_FAILURE;
+    }
+    printf("Success creaking stack\n");
+
+    /* test the push_stack function */
+    if (push_stack(stack1, 2) != 0)
+    {
+        fprintf(stderr, "Failure to push_stack()\n");
+        return EXIT_FAILURE;
+    }
+    printf("Success push on to stack\n");
+    if (push_stack(stack1, 3) != 0)
+    {
+        fprintf(stderr, "Failure to push_stack()\n");
+        return EXIT_FAILURE;
+    }
+    printf("Success push on to stack\n");
+    if (push_stack(stack1, 4) != 0)
+    {
+        fprintf(stderr, "Failure to push_stack()\n");
+        return EXIT_FAILURE;
+    }
+    printf("Success push on to stack\n");
+
+    /* test the pop_stack function */
+    if (pop_stack(stack1, &data) != 0)
+    {
+        fprintf(stderr, "Failure to pop out data\n");
+        return EXIT_FAILURE;
+    }
+    if (data != 4)
+    {
+        fprintf(stderr, "pop out worng data\n");
+        return EXIT_FAILURE;
+    }
+    printf("Success poping correct value form stack\n");
+
+    /* test the is_empty_stack function */
+    ret = is_empty_stack(stack1);
+    if (ret == 1)
+    {
+        fprintf(stderr, "Failure to check if the stack is empty\n");
+        return EXIT_FAILURE;
+    }
+    if (ret == 0)
+        printf("the stack1 is empty\n");
+    else
+        printf("the stack1 is not empty\n");
+
+    /* test the top_stack function */
+    ret = top_stack(stack1, &data);
+    if (ret != 0)
+        fprintf(stderr, "Failure to find the top of element\n");
+    if (data != 3)
+    {
+        fprintf(stderr, "top out worng data\n");
+        return EXIT_FAILURE;
+    }
+    printf("Success to find the correct top of element\n");
+
+    /* test the destory_stack function */
+    if (destroy_stack(&stack1) != 0)
+    {
+        fprintf(stderr, "Failure to destroy the stack\n");
+        return EXIT_FAILURE;
+    }
+    printf("Success to destroy the stack!\n");
+
+    return EXIT_SUCCESS;
+}
+cat my_stack.c
+/*
+ * File:    my_stack.c
+ * Author:  Lei Xie
+ * Date:    November 12, 2014
+ * Version: 1.0
+ *
+ * Description: This file describes the interface to a number of functions.
+ */
+
+#include "my_stack.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+struct list_element
+{
+    int field1;
+    struct list_element * next;
+};
+
+/*
+ * Name:        new_stack
+ * purpose:     it is a function which allocaked memory for the struct 
+ *              * stack_t
+ * Output:      none
+ * Returns:     return new means return the new struct with alocated memory
+ *              return the return NULL means can not allocated memory for the
+ *              struct
+ * Assumptions: none
+ * Bugs:        none
+ */
+stack_t
+new_stack()
+{
+    stack_t new = malloc(sizeof(stack_t));
+    if (new == NULL)
+        return NULL;
+    return new;
+}
+
+/*
+ * Name:        push_stack
+ * purpose:     it is a function which push a integer into top of linked list
+ * Output:      none
+ * Returns:     return 1 means the linked list is NULL
+ *              return 2 means the can not new a list of element
+ *              return 0 means success push an element in to the list
+ * Assumptions: none
+ * Bugs:        none
+ */
+int
+push_stack(stack_t s, int data)
+{
+    if (s == NULL)
+        return 1;
+    stack_t node = new_stack();
+    if (node == NULL)
+        return 2;
+    node->field1 = data;
+    if (s->next == NULL)
+        node->next = NULL;
+    else
+        node->next = s->next;
+    s->next = node;
+    return 0;
+}
+
+/*
+ * Name:        pop_stack
+ * purpose:     it is a function which pop out a integer from a linked list
+ * Output:      none
+ * Returns:     return 1 means the linked list is NULL
+ *              return 0 means success pop out an element from the list
+ * Assumptions: none
+ * Bugs:        none
+ */
+int
+pop_stack(stack_t s, int * data)
+{
+    if (s == NULL)
+        return 1;
+    stack_t top = s->next;
+    *data = top->field1;
+    s->next = top->next;
+    free(top);
+    return 0;
+}
+
+/*
+ * Name:        top_stack
+ * purpose:     it is a function which can find the top element in the stack
+ * Output:      none
+ * Returns:     return 1 means the stack is empty
+ *              return 2 means reach to the end of stack
+ *              return 0 means success to find the top of the element
+ * Assumptions: none
+ * Bugs:        none
+ */
+int
+top_stack(const stack_t s, int * data)
+{
+    if (s == NULL)
+        return 1;
+    if (s->next == NULL)
+        return 2;
+    *data = s->next->field1;
+    return 0;
+}
+
+/*
+ * Name:        is_empty_stack
+ * purpose:     it is a function which to check if the stack is empty
+ * Output:      none
+ * Returns:     return 1 means the stack is not NULL
+ *              return 2 means the stack is not empty
+ *              retrun 0 means the stack is empty
+ * Assumptions: none
+ * Bugs:        none
+ */
+int
+is_empty_stack(const stack_t s)
+{
+    if (s == NULL)
+        return 1;
+    if (s->next == NULL)
+        return 0;
+    else
+        return 2;
+}
+
+/*
+ * Name:        destory_stack
+ * purpose:     it is a function which destory the stack and the allocated
+ *              memory
+ * Output:      none
+ * Returns:     return 1 means the stack is NULL
+ *              return 0 success to destory the stack
+ * Assumptions: none
+ * Bugs:        none
+ */
+int
+destroy_stack(stack_t * s_p)
+{
+    if (*s_p == NULL)
+        return 1;
+    free((*s_p)->next);
+    free(*s_p);
+    *s_p = NULL;
+    return 0;
+} 
+cat my_stack.h
+/*
+ * File:    my_stack.h
+ * Author:  Lei Xie
+ * Date:    November 12, 2014
+ * Version: 1.0
+ *
+ * Description: This file describes the interface to a number of functions.
+ */
+
+#ifndef MY_STACK
+#define MY_STACK
+
+typedef struct list_element * stack_t;
+
+/*
+ * Name:        new_stack
+ * purpose:     it is a function which allocaked memory for the struct 
+ *              * stack_t
+ * Output:      none
+ * Returns:     return new means return the new struct with alocated memory
+ *              return the return NULL means can not allocated memory for the
+ *              struct
+ * Assumptions: none
+ * Bugs:        none
+ */
+stack_t  new_stack();
+
+
+/*
+ * Name:        push_stack
+ * purpose:     it is a function which push a integer into top of linked list
+ * Output:      none
+ * Returns:     return 1 means the linked list is NULL
+ *              return 2 means the can not new a list of element
+ *              return 0 means success push an element in to the list
+ * Assumptions: none
+ * Bugs:        none
+ */
+int push_stack(stack_t s, int);
+
+
+/*
+ * Name:        pop_stack
+ * purpose:     it is a function which pop out a integer from a linked list
+ * Output:      none
+ * Returns:     return 1 means the linked list is NULL
+ *              return 0 means success pop out an element from the list
+ * Assumptions: none
+ * Bugs:        none
+ */
+int pop_stack(stack_t s, int *);
+
+
+/*
+ * Name:        top_stack
+ * purpose:     it is a function which can find the top element in the stack
+ * Output:      none
+ * Returns:     return 1 means the stack is empty
+ *              return 2 means reach to the end of stack
+ *              return 0 means success to find the top of the element
+ * Assumptions: none
+ * Bugs:        none
+ */
+int top_stack(const stack_t s, int *);
+
+
+/*
+ * Name:        is_empty_stack
+ * purpose:     it is a function which to check if the stack is empty
+ * Output:      none
+ * Returns:     return 1 means the stack is not NULL
+ *              return 2 means the stack is not empty
+ *              retrun 0 means the stack is empty
+ * Assumptions: none
+ * Bugs:        none
+ */
+int is_empty_stack(const stack_t s);
+
+
+/*
+ * Name:        destory_stack
+ * purpose:     it is a function which destory the stack and the allocated
+ *              memory
+ * Output:      none
+ * Returns:     return 1 means the stack is NULL
+ *              return 0 success to destory the stack
+ * Assumptions: none
+ * Bugs:        none
+ */
+int destroy_stack(stack_t *);
+
+#endif
+cat Makefile
+CC = gcc
+FLAGS = -Wall -std=gnu99 -g
+SOURCE = a9p2
+
+all: view compile execute
+
+view: $(SOURCE).c
+		cat $(SOURCE).c
+		cat my_stack.c
+		cat my_stack.h
+		cat Makefile
+
+compile: $(SOURCE).c
+		$(CC) $(FLAGS) $(SOURCE).c my_stack.c -o $(SOURCE)
+
+execute: $(SOURCE)
+		$(SOURCE)
+gcc -Wall -std=gnu99 -g a9p2.c my_stack.c -o a9p2
+a9p2
+Success creaking stack
+Success push on to stack
+Success push on to stack
+Success push on to stack
+Success poping correct value form stack
+the stack1 is not empty
+Success to find the correct top of element
+Success to destroy the stack!
+sh-4.1$ exit
+
+Script done on Thu 13 Nov 2014 11:00:51 PM MSK
