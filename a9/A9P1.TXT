@@ -1,0 +1,392 @@
+Script started on Thu 13 Nov 2014 11:46:55 PM MSK
+[?1034hsh-4.1$ make
+cat a9p1.c
+
+/*
+ * File:     a9p1.c
+ * Author:   Lei Xie   100123800
+ * Date:     2014/11/9
+ * Version:  1.0
+ *
+ * Purpose:     The prpgram which will take each function fi() in mystery.o
+ *              and find the x between 0 and PI 
+ *              but the time of calling fi() function is limited
+ *              if the times of calling is over the max_evals it will print
+ *              different message
+ */
+#include "mystery.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI    3.14159265358979323846263433
+#endif
+
+/*
+ * Name:        find_zero
+ * purpose:     it is a function which can find a x between 0 and PI when the
+ *              fi(x) == 0 or <= tolerance
+ * Output:      none
+ * Returns:     return 0 means success to fine the number x which fi(x) <= 
+ *              tolerance
+ *              return 1 means can not find such x
+ * Assumptions: none
+ * Bugs:        none
+ */
+int
+find_zero(double (*f)(double), double x_min, double x_max, double tol,
+        int max_evals, double * desired_x, int * num_evals)
+{
+    double y1, y2, mid, f_mid;
+    int i = 0;
+    int count = 0;
+    y1 = f(x_min);
+    count++;
+    y2 = f(x_max);
+    count++;
+    for (i = 1 + count; i <= max_evals; i++)
+    {
+        /* when fi(x1) == fi(x2) == 0 */ 
+        if (y1 == y2 && y1 == 0)
+        {
+            *desired_x = x_min;
+            *num_evals = i;
+            return 0;
+        }
+        /* when fi(x1) > fi(x2) */
+        else if (y1 > y2)
+        {
+            mid = (x_min + x_max) / 2;
+            f_mid = f(mid);
+            if (fabs(f_mid) <= tol)
+            {
+                *num_evals = i;
+                *desired_x = mid;
+                return 0;
+            }
+            if (f_mid > 0)
+            {
+                x_min = mid;
+                y1 = f_mid;
+            }
+            else if (f_mid < 0)
+            {
+                x_max = mid;
+                y2 = f_mid;
+            }
+        }
+        /* when fi(x1) < fi(x2) */
+        else if (y1 < y2)
+        {
+            mid = (x_min + x_max) / 2;
+            f_mid = f(mid);
+            if (fabs(f_mid) <= tol)
+            {
+                *num_evals = i;
+                *desired_x = mid;
+                return 0;
+            }
+            if (f_mid > 0)
+            {
+                x_max = mid;
+                y2 = f_mid;
+            }
+            else if (f_mid < 0)
+            {
+                x_min = mid;
+                y1 = f_mid;
+            }
+        }
+    }
+    return 1;
+}
+int
+main(int argc, char * argv[])
+{
+    double tol;
+    int max_tries, ret;
+    double x;
+    int evals = 0;
+
+    /* warrning if not enough argument */
+    if (argc != 3)
+    {
+        fprintf(stderr, "Invalid input, Usgee %s tol max_tries\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    ret = sscanf(argv[1], "%lf", &tol);
+
+    /* warnning if can not read a double value form argv[1] */
+    if (ret != 1)
+    {
+        fprintf(stderr, "Invalid input, Usgee %s tol max_tries\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+    /* warnning if tol less than 0 */
+    if (tol < 0)
+    {
+        fprintf(stderr, "The number of tol should not be less than 0\n");
+        return EXIT_FAILURE;
+    }
+
+
+    sscanf(argv[2], "%d", &max_tries);
+
+    /* warnning if can not read a double value form argv[2] */
+    if (ret != 1)
+    {
+        fprintf(stderr, "Invalid input, Usgee %s tol max_tries\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+    /* warnning if max_tries less equal than 0 */
+    if (max_tries <= 0)
+    {
+        fprintf(stderr, "The number of tol should be greater than 0\n");
+        return EXIT_FAILURE;
+    }
+
+    /* print format */
+    printf("function        tollerance        evals    found?   x\n");
+    printf("-------------------------------------------------------------\n");
+
+    /* test f1() */
+    ret = find_zero(f1, 0.0, M_PI, tol, max_tries, &x, &evals);
+
+    if (ret == 1)
+        printf("f1              %-17.e %-8d no       ?\n", tol, max_tries);
+    if (ret == 0)
+        printf("f1              %-17.e %-8d yes      %-.9lf\n", tol, evals, x);
+
+    /* test f2() */
+    ret = find_zero(f2, 0.0, M_PI, tol, max_tries, &x, &evals);
+    if (ret == 1)
+        printf("f2              %-17.e %-8d no       ?\n", tol, max_tries);
+    if (ret == 0)
+        printf("f2              %-17.e %-8d yes      %-.9lf\n", tol, evals, x);
+
+    /* test f3() */
+    ret = find_zero(f3, 0.0, M_PI, tol, max_tries, &x, &evals);
+    if (ret == 1)
+        printf("f3              %-17.e %-8d no       ?\n", tol, max_tries);
+    if (ret == 0)
+        printf("f3              %-17.e %-8d yes      %-.9lf\n", tol, evals, x);
+
+    /* test f4() */
+    ret = find_zero(f4, 0.0, M_PI, tol, max_tries, &x, &evals);
+    if (ret == 1)
+        printf("f4              %-17.e %-8d no       ?\n", tol, max_tries);
+    if (ret == 0)
+        printf("f4              %-17.e %-8d yes      %-.9lf\n", tol, evals, x);
+
+    /* test f5() */
+    ret = find_zero(f5, 0.0, M_PI, tol, max_tries, &x, &evals);
+    if (ret == 1)
+        printf("f5              %-17.e %-8d no       ?\n", tol, max_tries);
+    if (ret == 0)
+        printf("f5              %-17.e %-8d yes      %-.9lf\n", tol, evals, x);
+
+    /* test f6() */
+    ret = find_zero(f6, 0.0, M_PI, tol, max_tries, &x, &evals);
+    if (ret == 1)
+        printf("f6              %-17.e %-8d no       ?\n", tol, max_tries);
+    if (ret == 0)
+        printf("f6              %-17.e %-8d yes      %-.9lf\n", tol, evals, x);
+
+    return EXIT_SUCCESS;
+}
+cat mystery.h
+/*
+ * File:	mystery.h
+ * Author: 	Jim Diamond
+ * Date:	November 9, 2006
+ * Version:	1.0
+ * 
+ * Description: This file describes the interface to a number of functions.
+ */
+
+#ifndef MYSTERY_H
+#define MYSTERY_H
+
+/*
+ * Function:	f1()
+ * Purpose:	Compute mystery function f1()
+ * Arguments:	A double value "x"
+ * Returns:	A double value y = f1(x)
+ * Bugs:	None known
+ * Notes:	The function computed here is top secret.
+ */
+double f1(double);
+
+
+/*
+ * Function:	f2()
+ * Purpose:	Compute mystery function f2()
+ * Arguments:	A double value "x"
+ * Returns:	A double value y = f2(x)
+ * Bugs:	None known
+ * Notes:	The function computed here is top secret.
+ */
+double f2(double);
+
+
+/*
+ * Function:	f3()
+ * Purpose:	Compute mystery function f3()
+ * Arguments:	A double value "x"
+ * Returns:	A double value y = f3(x)
+ * Bugs:	None known
+ * Notes:	The function computed here is top secret.
+ */
+double f3(double);
+
+
+/*
+ * Function:	f4()
+ * Purpose:	Compute mystery function f4()
+ * Arguments:	A double value "x"
+ * Returns:	A double value y = f4(x)
+ * Bugs:	None known
+ * Notes:	The function computed here is top secret.
+ */
+double f4(double);
+
+
+/*
+ * Function:	f5()
+ * Purpose:	Compute mystery function f5()
+ * Arguments:	A double value "x"
+ * Returns:	A double value y = f5(x)
+ * Bugs:	None known
+ * Notes:	The function computed here is top secret.
+ */
+double f5(double);
+
+
+/*
+ * Function:	f6()
+ * Purpose:	Compute mystery function f6()
+ * Arguments:	A double value "x"
+ * Returns:	A double value y = f6(x)
+ * Bugs:	None known
+ * Notes:	The function computed here is top secret.
+ */
+double f6(double);
+
+#endif
+cat Makefile
+CC = gcc
+FLAGS = -Wall -std=c99 -g -lm
+SOURCE = a9p1
+
+all: view compile execute
+
+view: $(SOURCE).c
+		cat $(SOURCE).c
+		cat mystery.h
+		cat Makefile
+
+compile: $(SOURCE).c
+		$(CC) $(FLAGS) $(SOURCE).c mystery.o -o $(SOURCE)
+
+execute: $(SOURCE)
+		$(SOURCE) 0.0001 100
+		echo
+		$(SOURCE) 0.0000001 100
+		echo
+		$(SOURCE) 0.0000000000001 100
+		echo
+		$(SOURCE) 0.0000000000001 50
+		echo
+		-$(SOURCE) 20
+		echo
+		-$(SOURCE) 20 30 40
+		echo
+		-$(SOURCE) -2 10
+		echo
+		-$(SOURCE) 0.001 -5
+		echo
+		-$(SOURCE) sjd -5
+		echo
+		-$(SOURCE) 0.001 sdsd
+		echo
+
+gcc -Wall -std=c99 -g -lm a9p1.c mystery.o -o a9p1
+a9p1 0.0001 100
+function        tollerance        evals    found?   x
+-------------------------------------------------------------
+f1              1e-04             22       yes      0.000002996
+f2              1e-04             17       yes      0.840909093
+f3              1e-04             100      no       ?
+f4              1e-04             13       yes      1.256330265
+f5              1e-04             15       yes      3.000082926
+f6              1e-04             20       yes      2.289430373
+echo
+
+a9p1 0.0000001 100
+function        tollerance        evals    found?   x
+-------------------------------------------------------------
+f1              1e-07             22       yes      0.000002996
+f2              1e-07             27       yes      0.840896454
+f3              1e-07             100      no       ?
+f4              1e-07             23       yes      1.256637361
+f5              1e-07             26       yes      2.999999973
+f6              1e-07             30       yes      2.289428489
+echo
+
+a9p1 0.0000000000001 100
+function        tollerance        evals    found?   x
+-------------------------------------------------------------
+f1              1e-13             22       yes      0.000002996
+f2              1e-13             47       yes      0.840896415
+f3              1e-13             100      no       ?
+f4              1e-13             43       yes      1.256637061
+f5              1e-13             45       yes      3.000000000
+f6              1e-13             44       yes      2.289428485
+echo
+
+a9p1 0.0000000000001 50
+function        tollerance        evals    found?   x
+-------------------------------------------------------------
+f1              1e-13             22       yes      0.000002996
+f2              1e-13             47       yes      0.840896415
+f3              1e-13             50       no       ?
+f4              1e-13             43       yes      1.256637061
+f5              1e-13             45       yes      3.000000000
+f6              1e-13             44       yes      2.289428485
+echo
+
+a9p1 20
+Invalid input, Usgee a9p1 tol max_tries
+make: [execute] Error 1 (ignored)
+echo
+
+a9p1 20 30 40
+Invalid input, Usgee a9p1 tol max_tries
+make: [execute] Error 1 (ignored)
+echo
+
+a9p1 -2 10
+The number of tol should not be less than 0
+make: [execute] Error 1 (ignored)
+echo
+
+a9p1 0.001 -5
+The number of tol should be greater than 0
+make: [execute] Error 1 (ignored)
+echo
+
+a9p1 sjd -5
+Invalid input, Usgee a9p1 tol max_tries
+make: [execute] Error 1 (ignored)
+echo
+
+a9p1 0.001 sdsd
+The number of tol should be greater than 0
+make: [execute] Error 1 (ignored)
+echo
+
+sh-4.1$ exit
+
+Script done on Thu 13 Nov 2014 11:53:39 PM MSK
